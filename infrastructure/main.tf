@@ -101,7 +101,7 @@ resource "aws_ecs_task_definition" "challange_task_definition" {
     }
   }])
   requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"  # You can adjust these resource values based on your needs
+  cpu                      = "256"  
   memory                   = "512"
 }
 
@@ -115,9 +115,9 @@ resource "aws_ecs_service" "challange_ecs_service" {
   
   # Reference the security group for the ECS service
   network_configuration {
-    subnets          = [aws_subnet.challange_subnets[*].id]  # Replace with the subnet ID where you want to deploy the service
+    subnets          = [for k, v in aws_subnet.challange_subnets : aws_subnet.challange_subnets[k].id] 
     security_groups  = [aws_security_group.ecs_service_sg.id]
-    assign_public_ip = true  # Set to false if you want to use a private IP address
+    assign_public_ip = true 
   }
 }
 
@@ -127,8 +127,8 @@ resource "aws_lb" "ecs_alb" {
   name               = "ecs-alb"
   load_balancer_type = "application"
   
-  subnets            = [aws_subnet.challange_subnets[*].id] 
-  security_groups    = [aws_security_group.ecs_alb_sg.id]
+  subnets            = [for k, v in aws_subnet.challange_subnets : aws_subnet.challange_subnets[k].id] 
+  security_groups    = [aws_security_group.ecs_service_sg.id]
 }
 
 # Create an ALB listener on port 80
